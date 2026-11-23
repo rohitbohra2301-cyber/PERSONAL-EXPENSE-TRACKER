@@ -5,11 +5,12 @@ A responsive personal expense tracker built with Next.js and TypeScript.
 ## Features
 
 - Add, edit, and delete expenses
-- Category and date-based filtering
+- Search and category filtering
 - Monthly spending overview
 - Category breakdown chart
-- Budget progress tracking
+- Monthly budget progress
 - Browser local-storage persistence
+- Responsive desktop and mobile interface
 
 ## Run locally
 
@@ -26,3 +27,7 @@ Open `http://localhost:3000`.
 npm run build
 npm start
 ```
+
+## Continuous integration
+
+Every push or pull request to `main` installs dependencies and verifies a production build.
