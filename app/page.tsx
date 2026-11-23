@@ -37,7 +37,7 @@ function Icon({ name, size = 18 }: { name: string; size?: number }) {
     settings: <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2H12v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L7.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 6 14H5.8v-4H6a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L7.2 7 9 5.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 12 4v-.2h4V4a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L20.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H22a1.7 1.7 0 0 0-2.6 1z"/></>,
     plus: <path d="M12 5v14M5 12h14"/>,
     search: <><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></>,
-    bell: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></>,
+    bell: <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>,
     more: <><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></>,
   };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
@@ -73,7 +73,6 @@ export default function Home() {
     value: expenses.filter((expense) => expense.category === name).reduce((sum, expense) => sum + expense.amount, 0),
   })).filter((item) => item.value > 0);
 
-  const maxCategory = Math.max(...byCategory.map((item) => item.value), 1);
   const savings = 2840;
 
   function submitExpense(event: FormEvent<HTMLFormElement>) {
@@ -108,7 +107,7 @@ export default function Home() {
     let start = 0;
     const parts = byCategory.map((item) => {
       const portion = (item.value / total) * 100;
-      const part = `${item.name === "Food" ? "#ff8d7d" : item.name === "Transport" ? "#7b6cf6" : item.name === "Shopping" ? "#f4c96b" : item.name === "Bills" ? "#62bfa4" : item.name === "Health" ? "#82aaf7" : "#d58be8"} ${start}% ${start + portion}%`;
+      const part = `${categories[item.name]} ${start}% ${start + portion}%`;
       start += portion;
       return part;
     });
@@ -153,7 +152,7 @@ export default function Home() {
           </article>
 
           <article className="panel budgetPanel">
-            <div className="panelHeader"><div><p>Monthly budget</p><h2>Budget progress</h2></div><button className="more"><Icon name="more" /></button></div>
+            <div className="panelHeader"><div><p>Monthly budget</p><h2>Budget progress</h2></div><button className="more" aria-label="More options"><Icon name="more" /></button></div>
             <div className="budgetRing" style={{ "--progress": `${Math.min((total / 1200) * 100, 100)}%` } as React.CSSProperties}><div><strong>{Math.round((total / 1200) * 100)}%</strong><span>used</span></div></div>
             <div className="budgetLabels"><div><span>Spent</span><strong>${total.toFixed(2)}</strong></div><div><span>Remaining</span><strong>${Math.max(1200 - total, 0).toFixed(2)}</strong></div></div>
           </article>
@@ -162,7 +161,7 @@ export default function Home() {
             <div className="panelHeader"><div><p>Categories</p><h2>Spending by category</h2></div></div>
             <div className="categoryBody">
               <div className="donut" style={{ background: donutGradient }}><div><strong>${total.toFixed(0)}</strong><span>Total</span></div></div>
-              <div className="legend">{byCategory.sort((a, b) => b.value - a.value).map((item) => <div className="legendItem" key={item.name}><span className="dot" style={{ background: categories[item.name] }}/><span>{item.name}</span><strong>${item.value.toFixed(2)}</strong></div>)}</div>
+              <div className="legend">{[...byCategory].sort((a, b) => b.value - a.value).map((item) => <div className="legendItem" key={item.name}><span className="dot" style={{ background: categories[item.name] }}/><span>{item.name}</span><strong>${item.value.toFixed(2)}</strong></div>)}</div>
             </div>
           </article>
 
@@ -170,10 +169,10 @@ export default function Home() {
             <div className="panelHeader"><div><p>Transactions</p><h2>Recent expenses</h2></div><button className="viewAll">View all</button></div>
             <div className="toolbar">
               <label className="search"><Icon name="search" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search expenses" /></label>
-              <select value={category} onChange={(event) => setCategory(event.target.value)}><option>All</option>{Object.keys(categories).map((name) => <option key={name}>{name}</option>)}</select>
+              <select value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Filter by category"><option>All</option>{Object.keys(categories).map((name) => <option key={name}>{name}</option>)}</select>
             </div>
             <div className="transactionList">
-              {filtered.length ? filtered.map((expense) => <div className="transaction" key={expense.id}><div className="categoryIcon" style={{ background: `${expense.color}25`, color: expense.color }}>{expense.category[0]}</div><div className="transactionName"><strong>{expense.title}</strong><span>{expense.category} · {new Date(`${expense.date}T00:00:00`).toLocaleDateDateString ? new Date(`${expense.date}T00:00:00`).toLocaleDateString() : expense.date}</span></div><strong className="amount">-${expense.amount.toFixed(2)}</strong><div className="transactionActions"><button onClick={() => openEdit(expense)}>Edit</button><button onClick={() => deleteExpense(expense.id)}>×</button></div></div>) : <div className="empty">No expenses found.</div>}
+              {filtered.length ? filtered.map((expense) => <div className="transaction" key={expense.id}><div className="categoryIcon" style={{ background: `${expense.color}25`, color: expense.color }}>{expense.category[0]}</div><div className="transactionName"><strong>{expense.title}</strong><span>{expense.category} · {new Date(`${expense.date}T00:00:00`).toLocaleDateString()}</span></div><strong className="amount">-${expense.amount.toFixed(2)}</strong><div className="transactionActions"><button onClick={() => openEdit(expense)}>Edit</button><button onClick={() => deleteExpense(expense.id)} aria-label={`Delete ${expense.title}`}>×</button></div></div>) : <div className="empty">No expenses found.</div>}
             </div>
           </article>
         </section>
